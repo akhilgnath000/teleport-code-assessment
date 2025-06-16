@@ -1,5 +1,7 @@
 package com.teleport.tracking.service;
 
+import java.time.Instant;
+import java.time.format.DateTimeFormatter;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -21,8 +23,9 @@ public class TrackingService {
 
 	private static final Logger logger = LogManager.getLogger(TrackingService.class);
 
-	@Autowired
-	private TrackingDao dao;
+	/*
+	 * @Autowired private TrackingDao dao;
+	 */
 
 	private final String TRACKING_ID_PREFIX = "TRK";
 
@@ -45,15 +48,15 @@ public class TrackingService {
 		logger.info("TrackingService.generateTrackingNumber() : Started generating tracking number");
 
 		String trackingNumber;
-		// For future usage to fetch next sequence value if we have sequence in DB table
+		// For future usage to fetch next sequence value if we have sequence in DB table or any DB activities
 		// dao.fetchNextTrackingIdSequence();
 
 		do {
 			String raw = TRACKING_ID_PREFIX + UUID.randomUUID().toString();
 			trackingNumber = generateCode(raw);
 		} while (generatedIds.putIfAbsent(trackingNumber, true) != null);
-
-		return new TrackingIdResponse(trackingNumber, String.valueOf(System.currentTimeMillis()));
+		Instant now = Instant.now();
+		return new TrackingIdResponse(trackingNumber, DateTimeFormatter.ISO_INSTANT.format(now));
 	}
 
 	private String generateCode(String input) {
